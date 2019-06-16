@@ -7,7 +7,7 @@ namespace mate2
     {
         static void Main(string[] args)
         {
-            string input = @"mate a {};";
+            string input = @"mate 猫猫{};";
             string output = "";
             var stream = new AntlrInputStream(input);
             var lexer = new MateGrammarLexer(stream);
