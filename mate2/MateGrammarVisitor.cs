@@ -41,14 +41,18 @@ namespace mate2
         public override object VisitBlock([NotNull] MateGrammarParser.BlockContext context)
         {
             var strExp = "";
-            var text=CannotVisit((context.children as List<Antlr4.Runtime.Tree.IParseTree>)/*.GetRange(1, context.children.Count - 2)*/);
-
-            return text;
+            //var text = CannotVisit((context.children as List<Antlr4.Runtime.Tree.IParseTree>)/*.GetRange(1, context.children.Count - 2)*/);
+            foreach(var cc in context.children)
+            {
+                strExp += Convert.ToString(Visit(cc));
+            }
+            //return text;
+            return strExp;
         }
 
         public override object VisitMateDefineWithBlock([NotNull] MateGrammarParser.MateDefineWithBlockContext context)
         {
-            var text= "class" + " " + Convert.ToString(context.T标识符()) +" \n"+ Convert.ToString(Visit(context.block())) + ";";
+            var text = "class" + " " + Convert.ToString(context.T标识符()) + " \n" + Convert.ToString(Visit(context.block())) + ";";
 
             return text;
         }
@@ -66,7 +70,7 @@ namespace mate2
         }
         public override object VisitVarDefineWithVarval([NotNull] MateGrammarParser.VarDefineWithVarvalContext context)
         {
-            var text = Convert.ToString(context.T类型名()+" "+context.T标识符()+" "+ Visit(context.varval())+";");
+            var text = Convert.ToString(context.T类型名() + " " + context.T标识符() + " " + Visit(context.varval()) + ";");
             return text;
         }
         public override object VisitVarval([NotNull] MateGrammarParser.VarvalContext context)
@@ -78,22 +82,22 @@ namespace mate2
         /// <summary>
         /// 对没有被语法包括的内容进行处理
         /// </summary>
-        /// <param name="contextChildren"></param>
+        /// <param name="contextChildren">语法树列表，tree里面还有tree</param>
         /// <returns></returns>
         public object CannotVisit(List<Antlr4.Runtime.Tree.IParseTree> contextChildren)
         {
             var strExp = "";
 
-            foreach(var context in contextChildren)
+            foreach (var context in contextChildren)
             {
                 var vc = Visit(context);
-                if(vc!=null)
+                if (vc != null)
                 {
                     return vc;
                 }
                 else
                 {
-                    if(context.ChildCount==0)
+                    if (context.ChildCount == 0)
                     {
                         strExp += context + " ";
                     }
@@ -106,7 +110,7 @@ namespace mate2
                             cclist.Add(sExpC);
                         }
 
-                        strExp += CannotVisit(cclist)+"";
+                        strExp += CannotVisit(cclist) + "";
                     }
 
                 }
@@ -116,6 +120,33 @@ namespace mate2
             return strExp;
         }
 
+        public override object Visit([NotNull] IParseTree tree)
+        {
+            var strExp = "";
+
+            var vc = tree.Accept(this);
+            if (vc != null)
+            {
+                strExp += vc;
+            }
+            else
+            {
+                if (tree.ChildCount == 0)
+                {
+                    strExp += tree + "";
+                }
+                else
+                {
+                    var cclist = new List<Antlr4.Runtime.Tree.IParseTree>();
+                    for (var index_cc = 0; index_cc < tree.ChildCount; index_cc++)
+                    {
+                        var sExpC = tree.GetChild(index_cc);
+                        strExp += Visit(sExpC) + "";
+                    }
+                }
+            }
+            return strExp;
+        }
 
         //public override object Visit([NotNull] IParseTree tree)
         //{
@@ -140,7 +171,7 @@ namespace mate2
         //                var sExpC = tree.GetChild(index_cc);
         //                strExp += Visit(sExpC) + "";
         //            }
-                    
+
         //        }
         //    }
 
